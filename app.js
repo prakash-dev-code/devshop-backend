@@ -22,9 +22,13 @@ if (process.env.NODE_ENV === "development") {
 app.use("/api/v1/users", userRoutes);
 // define routes
 
-app.use("/", (req, res, next) => {
-  res.send("SERVER IS LIVE ");
+app.get("/", (req, res) => {
+  console.log("Root GET route hit");
+  res.status(200).json({
+    message: "Server is running successfully",
+  });
 });
+
 
 // custom error handler middleware start
 
