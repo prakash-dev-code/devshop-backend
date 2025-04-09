@@ -1,6 +1,6 @@
+const DB_URL = process.env.MONGODB_ADDRESS;
 const mongoose = require("mongoose");
 
-const DB_URL = process.env.MONGODB_ADDRESS;
 console.log(DB_URL);
 
 const connectDB = async () => {
