@@ -1,6 +1,6 @@
 const dotenv = require("dotenv");
 
-dotenv.config({ path: "./.env.local" });
+dotenv.config({ path: "./.env" });
 const connectDB = require("./database/mongodb");
 const app = require("./app");
 const PORT = process.env.PORT;
