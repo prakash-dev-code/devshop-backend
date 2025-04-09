@@ -4,7 +4,7 @@ const morgan = require("morgan");
 const app = express();
 const path = require("path");
 const globalErrorHandler = require("./controllers/errorController");
-const userRoutes = require("./routes/userRoutes");
+const userRoutes = require("./routes/user/userRoutes");
 
 // Global middleware
 
