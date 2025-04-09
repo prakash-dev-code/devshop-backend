@@ -76,12 +76,14 @@ exports.signup = catchAsync(async (req, res, next) => {
   //   createSendToken(newUser, 201, res);
 
   const token = jwtToken(newUser._id);
+  const userDoc = newUser.toObject();
+  delete userDoc.password;
 
   res.status(201).json({
     status: "success",
     token,
     data: {
-      user: newUser,
+      user: userDoc,
     },
   });
 });
@@ -97,12 +99,14 @@ exports.singIn = catchAsync(async function (req, res, next) {
     return next(new appError("Incorrect email or password", 401));
   }
   const token = jwtToken(user._id);
+  const userDoc = user.toObject();
+  delete userDoc.password;
 
   res.status(201).json({
     status: "success",
     token,
     data: {
-      user: user,
+      user: userDoc,
     },
   });
 });
@@ -193,12 +197,15 @@ exports.changePassword = catchAsync(async (req, res, next) => {
   user.confirmPassword = req.body.confirmPassword;
   await user.save();
   const token = jwtToken(user._id);
+  const userDoc = user.toObject();
+  delete userDoc.password;
+  delete userDoc.passwordChangedAt;
 
   res.status(201).json({
     status: "success",
     token,
     data: {
-      user: user,
+      user: userDoc,
     },
   });
 
