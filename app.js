@@ -8,7 +8,15 @@ const userRoutes = require("./routes/user/userRoutes");
 
 // Global middleware
 
-app.use(cors());
+const corsOptions = {
+  origin: "http://localhost:3000", // or whatever your frontend origin is
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true, // allow cookies/auth headers if you're using them
+};
+
+app.use(cors(corsOptions));
+
+// app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
