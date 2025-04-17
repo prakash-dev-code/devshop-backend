@@ -96,7 +96,7 @@ exports.singIn = catchAsync(async function (req, res, next) {
   const user = await User.findOne({ email }).select("+password");
 
   if (!user || !(await user.correctPassword(password, user?.password))) {
-    return next(new appError("Incorrect email or password", 401));
+    return next(new appError("Incorrect email or password", 400));
   }
   const token = jwtToken(user._id);
   const userDoc = user.toObject();
@@ -189,7 +189,7 @@ exports.changePassword = catchAsync(async (req, res, next) => {
   //2. Check if posted current password is correct
 
   if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
-    return next(new appError("Your current password is wrong ", 401));
+    return next(new appError("Your current password is wrong ", 400));
   }
 
   //3. if So, update current password
