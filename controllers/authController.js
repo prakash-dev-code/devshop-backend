@@ -96,11 +96,12 @@ exports.singIn = catchAsync(async function (req, res, next) {
   const user = await User.findOne({ email }).select("+password");
 
   if (!user || !(await user.correctPassword(password, user?.password))) {
-    return next(new appError("Incorrect email or password", 401));
+    return next(new appError("Incorrect email or password", 400));
   }
   const token = jwtToken(user._id);
   const userDoc = user.toObject();
   delete userDoc.password;
+  delete userDoc.passwordChangedAt;
 
   res.status(201).json({
     status: "success",
