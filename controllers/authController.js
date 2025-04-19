@@ -76,8 +76,8 @@ exports.signup = catchAsync(async (req, res, next) => {
   //   createSendToken(newUser, 201, res);
 
   const token = jwtToken(newUser._id);
-  const userDoc = newUser.toObject();
-  delete userDoc.password;
+  const { _id, password: _, __v, ...rest } = newUser.toObject();
+  const userDoc = { id: _id, ...rest };
 
   res.status(201).json({
     status: "success",
