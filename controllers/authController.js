@@ -91,7 +91,7 @@ exports.signup = catchAsync(async (req, res, next) => {
 exports.singIn = catchAsync(async function (req, res, next) {
   const { email, password } = req.body;
   if (!email || !password)
-    return next(new appError("Please provide email and password", 404));
+    return next(new appError("Please provide email and password", 400));
 
   const user = await User.findOne({ email }).select("+password");
 
@@ -99,11 +99,10 @@ exports.singIn = catchAsync(async function (req, res, next) {
     return next(new appError("Incorrect email or password", 400));
   }
   const token = jwtToken(user._id);
-  const userDoc = user.toObject();
-  delete userDoc.password;
-  delete userDoc.passwordChangedAt;
+  const { _id, password: _, passwordChangedAt, __v, ...rest } = user.toObject();
+  const userDoc = { id: _id, ...rest };
 
-  res.status(201).json({
+  res.status(200).json({
     status: "success",
     token,
     data: {
