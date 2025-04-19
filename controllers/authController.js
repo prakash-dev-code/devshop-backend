@@ -5,6 +5,7 @@ const User = require("./../models/userModel");
 const jwt = require("jsonwebtoken");
 const appError = require("./../utils/appError");
 const catchAsync = require("./../utils/catchAsync");
+const { generateOTP } = require("./../utils/generateOTP");
 
 const jwtToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
@@ -71,15 +72,61 @@ exports.protect = catchAsync(async (req, res, next) => {
 // protected controller
 
 exports.signup = catchAsync(async (req, res, next) => {
-  const newUser = await User.create(req.body);
+  const { email } = req.body;
 
-  //   createSendToken(newUser, 201, res);
+  const otp = generateOTP(); // e.g., 6-digit code
+  const otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  const message = `Your OTP for email verification is: ${otp}`;
 
-  const token = jwtToken(newUser._id);
-  const { _id, password: _, __v, ...rest } = newUser.toObject();
-  const userDoc = { id: _id, ...rest };
+  const existing = await User.findOne({ email });
+
+  if (existing && !existing.isVerified) {
+    // Optionally, delete the old unverified user
+    await User.deleteOne({ email });
+  } else if (existing && existing.isVerified) {
+    return next(new appError("Email already in use", 400));
+  }
+
+  const newUser = await User.create({
+    ...req.body,
+    otp,
+    otpExpires,
+  });
+
+  await sendEmail({
+    email: newUser.email,
+    subject: "Email Verification OTP - valid for 10 minutes",
+    text: message,
+  });
 
   res.status(201).json({
+    status: "success",
+    message: "OTP sent to your email for verification",
+  });
+});
+
+// verify email
+exports.verifyEmail = catchAsync(async (req, res, next) => {
+  const { email, otp } = req.body;
+
+  const user = await User.findOne({
+    email,
+    otp,
+    otpExpires: { $gt: Date.now() },
+  });
+
+  if (!user) return next(new appError("Invalid or expired OTP", 400));
+
+  user.isVerified = true;
+  user.otp = undefined;
+  user.otpExpires = undefined;
+  await user.save({ validateBeforeSave: false });
+
+  const token = jwtToken(user._id);
+  const { _id, password: _, __v, ...rest } = user.toObject();
+  const userDoc = { id: _id, ...rest };
+
+  res.status(200).json({
     status: "success",
     token,
     data: {
