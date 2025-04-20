@@ -170,13 +170,35 @@ exports.forgetPassword = async function (req, res, next) {
     "host"
   )}/api/v1/users/resetPassword/${resetToken}`;
 
-  const message = `Visit ${resetURL} to reset your password.`;
+  // const message = `Visit ${resetURL} to reset your password.`;
+
+  const message = `
+  <div style="font-family: sans-serif; padding: 20px;">
+    <h2>Password Reset Request</h2>
+    <p>You requested a password reset. Click the button below to reset your password:</p>
+    <a 
+      href="${resetURL}" 
+      style="
+        background-color: #0070f3;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        display: inline-block;
+        margin-top: 10px;
+      "
+    >
+      Reset Password
+    </a>
+    <p>If you did not request this, please ignore this email.</p>
+  </div>
+`;
 
   try {
     await sendEmail({
       email: userByEmail.email,
       subject: "Password Reset Token valid for only 10 minutes",
-      text: message,
+      html: message,
     });
     res.status(200).json({
       status: "success",
