@@ -8,15 +8,24 @@ const userRoutes = require("./routes/user/userRoutes");
 
 // Global middleware
 
+const allowedOrigins = [
+  process.env.FRONTEND_LOCAL_HOST,
+  process.env.FRONTEND_LIVE_HOST,
+];
+
 const corsOptions = {
-  origin: "http://localhost:3000", // or whatever your frontend origin is
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  credentials: true, // allow cookies/auth headers if you're using them
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
-
-// app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
