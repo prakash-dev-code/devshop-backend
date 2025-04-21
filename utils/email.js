@@ -16,10 +16,12 @@ const sendEmail = async (props) => {
   });
 
   const mailOptions = {
+
     from: "Prakash <noreply@example.com>",
     to: props.email,
     subject: props.subject,
     text: props.text,
+    html: props.html,
   };
 
   try {
