@@ -9,6 +9,7 @@ userRouter.route("/sign-up").post(authController.signup);
 userRouter.route("/verify-email").post(authController.verifyEmail);
 userRouter.route("/forget-password").post(authController.forgetPassword);
 userRouter.route("/reset-password/:token").patch(authController.resetPassword);
+userRouter.route("/google/").post(authController.googleLogin);
 userRouter
   .route("/change-password")
   .patch(authController.protect, authController.changePassword);
