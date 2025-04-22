@@ -13,7 +13,7 @@ const allowedOrigins = [
   process.env.FRONTEND_LOCAL_HOST_2,
   process.env.FRONTEND_LIVE_HOST,
 ];
-console.log(allowedOrigins, "allowed origins");
+
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
