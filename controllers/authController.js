@@ -589,6 +589,7 @@ exports.changePassword = catchAsync(async (req, res, next) => {
 
   res.status(201).json({
     status: "success",
+    message: "Password changed successfully",
     token,
     data: {
       user: userDoc,
