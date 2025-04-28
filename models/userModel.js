@@ -15,20 +15,28 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, "Password is required"],
+    required: function () {
+      return !this.isOAuthUser; // 👈 Only required for normal signup
+    },
     minlength: [8, "Password must be at least 8 characters long"],
     select: false,
   },
-  confirmPassword: {
+
+  googleId: {
     type: String,
-    required: [true, "Confirm Password is required"],
-    validate: {
-      validator: function (v) {
-        return validator.equals(v, this.password);
-      },
-      message: "Passwords do not match",
-    },
+    unique: true,
+    sparse: true, // allows users to have an empty googleId until OAuth login
   },
+  // confirmPassword: {
+  //   type: String,
+  //   required: [true, "Confirm Password is required"],
+  //   validate: {
+  //     validator: function (v) {
+  //       return validator.equals(v, this.password);
+  //     },
+  //     message: "Passwords do not match",
+  //   },
+  // },
   role: {
     type: String,
     enum: ["admin", "user", "staff", "employee", "manager"],
