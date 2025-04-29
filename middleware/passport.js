@@ -8,7 +8,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:8000/api/v1/users/auth/google/callback", // Make sure this matches with Google Developer Console
+      callbackURL: `${process.env.BACKEND_LIVE_HOST}api/v1/users/auth/google/callback`, // Make sure this matches with Google Developer Console
     },
     async (accessToken, refreshToken, profile, done) => {
       const { id, emails, displayName } = profile;
