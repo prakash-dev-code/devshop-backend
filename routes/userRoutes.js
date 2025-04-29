@@ -25,7 +25,9 @@ userRouter.get(
   passport.authenticate("google", { session: false, failureRedirect: "/" }),
   (req, res) => {
     const token = signToken(req.user._id); // <-- generate JWT from user id
-    res.redirect(`http://localhost:3000/signin/success?token=${token}`);
+    res.redirect(
+      `${process.env.FRONTEND_LIVE_HOST}/signin/success?token=${token}`
+    );
     // or you can send JSON if API-only
     // res.json({ token });
   }
