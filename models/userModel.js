@@ -91,12 +91,6 @@ const userSchema = new mongoose.Schema({
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Order",
-      validate: {
-        validator: function (v) {
-          return mongoose.Types.ObjectId.isValid(v);
-        },
-        message: "Invalid order reference",
-      },
     },
   ],
 });
