@@ -4,7 +4,9 @@ const morgan = require("morgan");
 const app = express();
 const path = require("path");
 const globalErrorHandler = require("./controllers/errorController");
-const userRoutes = require("./routes/user/userRoutes");
+const userRoutes = require("./routes/userRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+const productRoutes = require("./routes/productRoutes");
 
 // Global middleware
 
@@ -40,6 +42,8 @@ if (process.env.NODE_ENV === "development") {
 
 // define routes
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/products", productRoutes);
 // define routes
 
 app.get("/", (req, res) => {
