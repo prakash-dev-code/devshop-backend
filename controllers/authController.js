@@ -6,14 +6,7 @@ const jwt = require("jsonwebtoken");
 const appError = require("./../utils/appError");
 const catchAsync = require("./../utils/catchAsync");
 const { generateOTP } = require("./../utils/generateOTP");
-const { OAuth2Client } = require("google-auth-library");
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-
-const jwtToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
-};
+const { signToken } = require("./../utils/jwtToken");
 
 const frontendUrl = process.env.FRONTEND_LIVE_HOST;
 // protected controller
@@ -72,48 +65,29 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.googleLogin = catchAsync(async (req, res, next) => {
-  const { idToken } = req.body;
-
-  if (!idToken) return next(new appError("ID token is required", 400));
-
-  // Verify token with Google
-  const ticket = await client.verifyIdToken({
-    idToken,
-    audience: process.env.GOOGLE_CLIENT_ID,
-  });
-
-  const payload = ticket.getPayload();
-  const { email, name, picture, sub: googleId } = payload;
-
-  if (!email)
-    return next(new appError("Email not found in Google account", 400));
-
-  let user = await User.findOne({ email });
-
-  if (!user) {
-    // Create a new user if one doesn't exist
-    user = await User.create({
-      email,
-      name,
-      photo: picture,
-      googleId,
-      isVerified: true, // Skip OTP since Google has verified
-    });
-  }
-
-  const token = jwtToken(user._id);
-  const { _id, password: _, __v, ...rest } = user.toObject();
-  const userDoc = { id: _id, ...rest };
-
+exports.getMe = (req, res) => {
   res.status(200).json({
     status: "success",
-    token,
     data: {
-      user: userDoc,
+      user: req.user, // user is already set in protect middleware
     },
   });
-});
+};
+// GOOGEL AUTH
+exports.loadAuth = (req, res, next) => {
+  res.render("auth");
+};
+
+exports.successGoogleLogin = (req, res) => {
+  if (!req.user) res.redirect("/failure");
+  console.log(req.user);
+  res.send("WELCOME" + req.user.email);
+};
+
+exports.failureGoogleLogin = (req, res) => {
+  res.send("Login failed");
+};
+// GOOGEL AUTH
 
 // protected controller
 
@@ -232,7 +206,7 @@ exports.signup = catchAsync(async (req, res, next) => {
               <td style="text-align:center;padding: 0 30px 20px">
 
                 <p style="margin-bottom: 25px;">Copy the OTP below to complete your verification.</p>
-               <pstyle="font-size: 24px; font-weight: 600; color: #6576ff;">${otp}</p>
+               <p style="font-size: 24px; font-weight: 600; color: #6576ff;">${otp}</p>
               </td>
             </tr>
             <tr>
@@ -312,7 +286,7 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
   user.otpExpires = undefined;
   await user.save({ validateBeforeSave: false });
 
-  const token = jwtToken(user._id);
+  const token = signToken(user._id);
   const { _id, password: _, __v, ...rest } = user.toObject();
   const userDoc = { id: _id, ...rest };
 
@@ -335,7 +309,7 @@ exports.singIn = catchAsync(async function (req, res, next) {
   if (!user || !(await user.correctPassword(password, user?.password))) {
     return next(new appError("Incorrect email or password", 400));
   }
-  const token = jwtToken(user._id);
+  const token = signToken(user._id);
   const { _id, password: _, passwordChangedAt, __v, ...rest } = user.toObject();
   const userDoc = { id: _id, ...rest };
 
@@ -551,7 +525,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   //3. update changePasswordAt property for user
   await user.save();
-  const token = jwtToken(user._id);
+  const token = signToken(user._id);
 
   const { _id, password: _, passwordChangedAt, __v, ...rest } = user.toObject();
   const userDoc = { id: _id, ...rest };
@@ -582,7 +556,7 @@ exports.changePassword = catchAsync(async (req, res, next) => {
   user.password = req.body.password;
   user.confirmPassword = req.body.confirmPassword;
   await user.save();
-  const token = jwtToken(user._id);
+  const token = signToken(user._id);
   const userDoc = user.toObject();
   delete userDoc.password;
   delete userDoc.passwordChangedAt;
