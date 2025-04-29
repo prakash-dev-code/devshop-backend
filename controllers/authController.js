@@ -6,13 +6,7 @@ const jwt = require("jsonwebtoken");
 const appError = require("./../utils/appError");
 const catchAsync = require("./../utils/catchAsync");
 const { generateOTP } = require("./../utils/generateOTP");
-
-
-const jwtToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
-  });
-};
+const { signToken } = require("./../utils/jwtToken");
 
 const frontendUrl = process.env.FRONTEND_LIVE_HOST;
 // protected controller
@@ -79,22 +73,21 @@ exports.getMe = (req, res) => {
     },
   });
 };
-// GOOGEL AUTH 
-exports.loadAuth = (req, res, next) => { 
-  res.render('auth')
-
-}
+// GOOGEL AUTH
+exports.loadAuth = (req, res, next) => {
+  res.render("auth");
+};
 
 exports.successGoogleLogin = (req, res) => {
-  if (!req.user) res.redirect('/failure')
-  console.log(req.user)
-  res.send("WELCOME" + req.user.email)
-}
+  if (!req.user) res.redirect("/failure");
+  console.log(req.user);
+  res.send("WELCOME" + req.user.email);
+};
 
 exports.failureGoogleLogin = (req, res) => {
-  res.send("Login failed")
- }
-// GOOGEL AUTH 
+  res.send("Login failed");
+};
+// GOOGEL AUTH
 
 // protected controller
 
@@ -293,7 +286,7 @@ exports.verifyEmail = catchAsync(async (req, res, next) => {
   user.otpExpires = undefined;
   await user.save({ validateBeforeSave: false });
 
-  const token = jwtToken(user._id);
+  const token = signToken(user._id);
   const { _id, password: _, __v, ...rest } = user.toObject();
   const userDoc = { id: _id, ...rest };
 
@@ -316,7 +309,7 @@ exports.singIn = catchAsync(async function (req, res, next) {
   if (!user || !(await user.correctPassword(password, user?.password))) {
     return next(new appError("Incorrect email or password", 400));
   }
-  const token = jwtToken(user._id);
+  const token = signToken(user._id);
   const { _id, password: _, passwordChangedAt, __v, ...rest } = user.toObject();
   const userDoc = { id: _id, ...rest };
 
@@ -532,7 +525,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
   //3. update changePasswordAt property for user
   await user.save();
-  const token = jwtToken(user._id);
+  const token = signToken(user._id);
 
   const { _id, password: _, passwordChangedAt, __v, ...rest } = user.toObject();
   const userDoc = { id: _id, ...rest };
@@ -563,7 +556,7 @@ exports.changePassword = catchAsync(async (req, res, next) => {
   user.password = req.body.password;
   user.confirmPassword = req.body.confirmPassword;
   await user.save();
-  const token = jwtToken(user._id);
+  const token = signToken(user._id);
   const userDoc = user.toObject();
   delete userDoc.password;
   delete userDoc.passwordChangedAt;
