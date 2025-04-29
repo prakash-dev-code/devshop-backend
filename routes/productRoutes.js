@@ -49,8 +49,9 @@ productRouter
 
 productRouter
   .route("/")
-  .all(authController.loadAuth) // apply auth before any method if needed
-  .get(userController.getAllUsers);
+  //   .all(authController.loadAuth) // apply auth before any method if needed
+  //   .get(userController.getAllUsers)
+  .post(productController.createProduct);
 
 productRouter
   .route("/:id")
