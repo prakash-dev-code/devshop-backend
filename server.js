@@ -1,9 +1,9 @@
 const dotenv = require("dotenv");
-
 dotenv.config({ path: "./.env" });
-const connectDB = require("./database/mongodb");
-const app = require("./app");
 const PORT = process.env.PORT;
+const app = require("./app");
+
+const connectDB = require("./database/mongodb");
 
 connectDB();
 

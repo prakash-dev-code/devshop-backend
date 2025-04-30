@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const crypto = require("crypto");
-const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const validator = require("validator");
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -15,19 +16,21 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, "Password is required"],
+    required: function () {
+      return !this.isOAuthUser; // 👈 Only required for normal signup
+    },
     minlength: [8, "Password must be at least 8 characters long"],
     select: false,
   },
-  confirmPassword: {
+
+  googleId: {
     type: String,
-    required: [true, "Confirm Password is required"],
-    validate: {
-      validator: function (v) {
-        return validator.equals(v, this.password);
-      },
-      message: "Passwords do not match",
-    },
+    unique: true,
+    sparse: true, // allows users to have an empty googleId until OAuth login
+  },
+  joinedAt: {
+    type: Date,
+    default: Date.now,
   },
   role: {
     type: String,
@@ -46,6 +49,50 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  otp: String,
+  otpExpires: Date,
+  bio: {
+    type: String,
+    maxlength: [150, "Bio cannot be longer than 150 characters"],
+    trim: true,
+  },
+  addresses: {
+    shipping: {
+      type: {
+        location: String,
+
+        phone: String,
+      },
+      default: null,
+    },
+    billing: {
+      type: {
+        location: String,
+        phone: String,
+      },
+      default: null,
+    },
+  },
+  country: {
+    type: String,
+    validate: {
+      validator: function (v) {
+        return validator.isISO31661Alpha2(v);
+      },
+      message: "Invalid ISO 3166-1 alpha-2 country code",
+    },
+    uppercase: true,
+  },
+  orders: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order",
+    },
+  ],
 });
 
 userSchema.pre("save", async function (next) {
@@ -55,12 +102,15 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
+// 🕒 Set passwordChangedAt field
 userSchema.pre("save", function (next) {
   if (!this.isModified("password") || this.isNew) return next();
 
   this.passwordChangedAt = Date.now() - 1000;
   next();
 });
+
+// 🔍 Exclude inactive users
 
 userSchema.pre(/^find/, function (next) {
   this.find({ active: { $ne: false } });
