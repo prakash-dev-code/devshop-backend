@@ -93,6 +93,30 @@ const userSchema = new mongoose.Schema({
       ref: "Order",
     },
   ],
+  cart: {
+    type: [{
+      product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        min: 1,
+        default: 1
+      },
+      priceAtAddition: {  // Snapshot of price when added
+        type: Number,
+        required: true
+      },
+      addedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }],
+    default: []
+  },
 });
 
 userSchema.pre("save", async function (next) {
