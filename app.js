@@ -14,7 +14,7 @@ const allowedOrigins = [
   process.env.FRONTEND_LOCAL_HOST_1,
   process.env.FRONTEND_LOCAL_HOST_2,
   process.env.FRONTEND_LIVE_HOST,
-  "http://localhost:5000/graphql",
+  "http://localhost:8000/graphql",
 ];
 
 const corsOptions = {
