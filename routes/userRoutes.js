@@ -52,6 +52,12 @@ userRouter
   .route("/")
   .all(authController.loadAuth) // apply auth before any method if needed
   .get(userController.getAllUsers);
+userRouter.patch("/cart/add", authController.protect, userController.addToCart);
+userRouter.delete(
+  "/cart/remove",
+  authController.protect,
+  userController.removeFromCart
+);
 
 userRouter
   .route("/:id")
