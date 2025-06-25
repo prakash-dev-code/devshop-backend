@@ -49,9 +49,13 @@ userRouter
   .patch(authController.protect, authController.changePassword);
 
 userRouter
-  .route("/")
-  .all(authController.loadAuth) // apply auth before any method if needed
-  .get(userController.getAllUsers);
+  .route("/") // apply auth before any method if needed
+  .get(
+    authController.protect,
+    authController.ristrictUser("admin"),
+    userController.getAllUsers
+  );
+
 userRouter.patch("/cart/add", authController.protect, userController.addToCart);
 userRouter.delete(
   "/cart/remove",

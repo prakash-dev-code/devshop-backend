@@ -575,7 +575,7 @@ exports.changePassword = catchAsync(async (req, res, next) => {
 
 // authorized some role to delete a tour
 
-exports.ristrictTour = (...roles) => {
+exports.ristrictUser = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return next(
