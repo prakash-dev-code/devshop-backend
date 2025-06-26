@@ -65,6 +65,7 @@ userRouter.delete(
 
 userRouter
   .route("/:id")
+  .all(authController.protect, authController.ristrictUser("admin"))
   .get(userController.getUser)
   .patch(userController.updateUser)
   .delete(userController.deleteUser);

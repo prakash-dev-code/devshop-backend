@@ -89,13 +89,18 @@ exports.getAll = (Model) =>
       .pagination();
 
     const doc = await feature.query;
+    const formattedDocs = doc.map((doc) => {
+      const obj = doc.toObject();
+      const { _id, ...rest } = obj;
+      return { id: _id, ...rest };
+    });
 
     res.status(200).json({
       status: "success",
       result: doc.length,
       totalCount,
       data: {
-        doc,
+        doc: formattedDocs,
       },
     });
   });
