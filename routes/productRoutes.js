@@ -1,6 +1,6 @@
 const express = require("express");
 const productController = require("../controllers/productControlller");
-// const passport = require("passport");
+const { upload } = require("../config/s3");
 const authController = require("../controllers/authController");
 
 const productRouter = express.Router();
@@ -14,12 +14,16 @@ productRouter.get("/", productController.getAllProduct);
 productRouter
   .route("/")
   .all(authController.protect, authController.ristrictUser("admin")) // apply auth before any method if needed
-  .post(productController.createProduct);
+  .post(upload.array("images"), productController.createProduct);
 
 productRouter
   .route("/:id")
+  .all(authController.protect, authController.ristrictUser("admin")) // apply auth before any method if needed
+  .patch(upload.array("images"), productController.updateProduct);
+productRouter
+  .route("/:id")
   .get(productController.getProduct)
-  .patch(productController.updateProduct)
+  // .patch(productController.updateProduct)
   .delete(productController.deleteProduct);
 
 module.exports = productRouter;
