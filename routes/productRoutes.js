@@ -9,6 +9,7 @@ const productRouter = express.Router();
 
 // public route
 productRouter.get("/", productController.getAllProduct);
+productRouter.route("/:id").get(productController.getProduct);
 
 // private route
 productRouter
@@ -20,10 +21,10 @@ productRouter
   .route("/:id")
   .all(authController.protect, authController.ristrictUser("admin")) // apply auth before any method if needed
   .patch(upload.array("images"), productController.updateProduct);
+
 productRouter
   .route("/:id")
-  .get(productController.getProduct)
-  // .patch(productController.updateProduct)
+  .all(authController.protect, authController.ristrictUser("admin")) // apply auth before any method if needed
   .delete(productController.deleteProduct);
 
 module.exports = productRouter;
